@@ -4,6 +4,12 @@
 __pycache__/
 logs/
 
+
 # files
+*.ui
 *.log
 *.env
+
+# my file
+result.json
+testqt.py
