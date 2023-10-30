@@ -1,12 +1,12 @@
 import sys
 import logging
 
-from utils import (
-    save_result,
+from model import (
     CDAManager,
     BrazenhemManager,
     ByManager,
 )
+from utils import save_result
 
 
 logging.basicConfig(filename='./logs/mylog.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')

@@ -10,6 +10,12 @@
 
 from PyQt5 import QtCore, QtWidgets
 
+from model import (
+    CDAManager,
+    BrazenhemManager,
+    ByManager,
+)
+
 
 class MainForm(object):
     def __init__(self, form) -> None:
@@ -62,8 +68,8 @@ class MainForm(object):
         _translate = QtCore.QCoreApplication.translate
         LineForm.setWindowTitle(_translate("LineForm", "Form"))
         self.DrawPushButton.setText(_translate("LineForm", "DRAW"))
-        self.LineManagerComboBox.setItemText(0, _translate("LineForm", "Brazenhem"))
-        self.LineManagerComboBox.setItemText(1, _translate("LineForm", "CDA"))
+        self.LineManagerComboBox.setItemText(0, _translate("LineForm", "CDA"))
+        self.LineManagerComboBox.setItemText(1, _translate("LineForm", "Brazenhem"))
         self.LineManagerComboBox.setItemText(2, _translate("LineForm", "By"))
         self.x1Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X1</span></p></body></html>"))
         self.y1Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y1</span></p></body></html>"))
@@ -76,6 +82,11 @@ class GridDataForm:
     MARGIN = 100
     COORD_LEN = 50
     POINT_MULT = 10
+    PAINT_TEMPLATES = {
+        'CDA': CDAManager,
+        'Brazenhem': BrazenhemManager,
+        'By': ByManager,
+    }
 
     def __init__(self, view):
         self.size = min(view.width(), view.height()) - 2 * self.MARGIN # 500
