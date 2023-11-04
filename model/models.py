@@ -1,4 +1,5 @@
 from collections import defaultdict
+import math
 
 
 class GraphicManager:
@@ -17,6 +18,10 @@ class GraphicManager:
     @property
     def coords(self):
         return [coords['plot'] for coords in self.res_table.values()]
+    
+    @property
+    def _c(self):
+        return False
     
 
 class CDAManager(GraphicManager):
@@ -89,6 +94,15 @@ class ByManager(GraphicManager):
             return True
         return False
     
+    def _round(self, x):
+        return math.floor(x + 0.5)
+    
+    def _fpart(self, x):
+        return x - math.floor(x)
+
+    def _rfpart(self, x):
+        return 1 - self._fpart(x)
+    
     def _calc_coords(self):
         if self._can_be_CDA():
             self.by_cda = True
@@ -97,50 +111,84 @@ class ByManager(GraphicManager):
             return
 
         x1, y1, x2, y2 = self.raw_coords
-        if x2 < x1:
+        steep = abs(y2 - y1) > abs(x2 - x1)
+        
+        if steep:
+            x1, y1 = y1, x1
+            x2, y2 = y2, x2 
+        
+        if x1 > x2:
             x1, x2 = x2, x1
             y1, y2 = y2, y1
+        
         dx, dy = x2 - x1, y2 - y1
-        grad = dy / dx
+        
+        if dx == 0.0:
+            grad = 1.0
+        else:
+            grad = dy / dx
         
         # process start point
-        xstart = int(x1)
-        yend = y1 + grad * (xstart - x1)
-        xgap = 1 - (x1 + 0.5) % 1
-        xpxl1 = xstart  # will use in loop
-        ypxl1 = int(yend // 1)
-        c = 1 - (yend % 1 * xgap)
-        self.res_table[0]['main'] = {'x': xpxl1, 'y': ypxl1, 'c': c, 'plot': (xpxl1, ypxl1, c)}
-        
-        c = yend % 1 * xgap
-        self.res_table[0]['cx'] = {'x': xpxl1, 'y': ypxl1, 'c': c, 'plot': (xpxl1, ypxl1 + 1, c)}
-        self.res_table[0]['cy'] = None        
+        xend = self._round(x1)
+        yend = y1 + grad * (xend - x1)
+        xgap = self._rfpart(x1 + 0.5)
+        xpxl1 = xend  # will use in loop
+        ypxl1 = math.floor(yend)
+
+        if steep:
+            c = round(self._rfpart(yend) * xgap, 2) or 1.0
+            self.res_table[0] = {'x': ypxl1, 'y': xpxl1, 'c': c, 'plot': (ypxl1, xpxl1)}
+            c = round(self._fpart(yend) * xgap, 2)  or 1.0
+            self.res_table[1]= {'x': ypxl1 + 1, 'y': xpxl1, 'c': c, 'plot': (ypxl1 + 1, xpxl1)}        
+        else:
+            c = round(self._rfpart(yend) * xgap, 2) or 1.0
+            self.res_table[0] = {'x': xpxl1, 'y': ypxl1, 'c': c, 'plot': (xpxl1, ypxl1)}
+            c = round(self._fpart(yend) * xgap, 2) or 1.0
+            self.res_table[1] = {'x': xpxl1, 'y': ypxl1 + 1, 'c': c, 'plot': (xpxl1, ypxl1 + 1)}        
         
         intery = yend + grad # first y-intersection for loop
 
         # process end point
-        xend = int(x2)
+        xend = self._round(x2)
         yend = y2 + grad * (xend - x2)
-        xgap = (x2 + 0.5) % 1
+        xgap = self._fpart(x2 + 0.5)
         xpxl2 = xend  # will use in loop
-        ypxl2 = int(yend // 1)
+        ypxl2 = math.floor(yend)
         
-        for i, x in enumerate(range(xstart + 1, xend - 1), start=1):
-            c = 1 - intery % 1
-            self.res_table[i]['main'] = {'x': x, 'y': intery, 'c': c, 'plot': (x, int(intery // 1), c)}    
-            
-            c = intery % 1
-            self.res_table[i]['cx'] = {'x': x, 'y': intery, 'c': c, 'plot': (x, int(intery // 1) + 1, c)}  
-            self.res_table[i]['cy'] = None  
-            intery = intery + grad
-            
-        xrange = xend - xstart
-        c = 1 - (yend % 1 * xgap)
-        self.res_table[xrange - 1]['main'] = {'x': xpxl2, 'y': ypxl2, 'c': c, 'plot': (xpxl2, ypxl2, c)}
+        i = 2
+        if steep:
+            for z in range(xpxl1 + 1, xpxl2):
+                c = round(self._rfpart(intery), 2) or 1.0
+                self.res_table[i] = {'x': math.floor(intery), 'y': z, 'c': c, 'plot': (math.floor(intery), z)}        
+                i += 1
+                c = round(self._fpart(yend) * xgap, 2)  or 1.0
+                self.res_table[i] = {'x': math.floor(intery) + 1, 'y': z, 'c': c, 'plot': (math.floor(intery) + 1, z)}        
+                intery += grad
+                i += 1
+        else:
+            for z in range(xpxl1 + 1, xpxl2):
+                c = round(self._rfpart(intery), 2) or 1.0
+                self.res_table[i] = {'x': z, 'y': math.floor(intery), 'c': c, 'plot': (z, math.floor(intery))}        
+                i += 1
+                c = round(self._fpart(yend), 2)  or 1.0
+                self.res_table[i] = {'x': z, 'y': math.floor(intery) + 1, 'c': c, 'plot': (z, math.floor(intery) + 1)}        
+                intery += grad
+                i += 1
         
-        c = yend % 1 * xgap
-        self.res_table[xrange - 1]['cx'] = {'x': xpxl2, 'y': ypxl2, 'c': c, 'plot': (xpxl2, ypxl2 + 1, c)}
-        self.res_table[xrange - 1]['cy'] = None
+        if steep:
+            c = round(self._rfpart(yend) * xgap, 2) or 1.0
+            self.res_table[i] = {'x': ypxl2, 'y': xpxl2, 'c': c, 'plot': (ypxl2, xpxl2)}
+            c = round(self._fpart(yend) * xgap, 2)  or 1.0
+            self.res_table[i+1]= {'x': ypxl2 + 1, 'y': xpxl2, 'c': c, 'plot': (ypxl2 + 1, xpxl2)}        
+        else:
+            c = round(self._rfpart(yend) * xgap, 2) or 1.0
+            self.res_table[i] = {'x': xpxl2, 'y': ypxl2, 'c': c, 'plot': (xpxl2, ypxl2)}
+            c = round(self._fpart(yend) * xgap, 2)  or 1.0
+            self.res_table[i+1] = {'x': xpxl2, 'y': ypxl2 + 1, 'c': c, 'plot': (xpxl2, ypxl2 + 1)}        
+        
+    @property
+    def _c(self):
+        return [coords['c'] for coords in self.res_table.values()]
     
     def __str__(self):
         return 'By'

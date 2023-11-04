@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QPainter, QPen, QFont, QColor
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt
 
 from view.forms import MainForm, GridDataForm
 
@@ -14,7 +14,8 @@ class MainView(QMainWindow):
         self.grid = GridDataForm(self)
         self.paint_model = None
         self.cache_points = []
-
+        self.cache_saturation = []
+        
         self.init_UI()
         
     def init_UI(self):
@@ -51,13 +52,7 @@ class MainView(QMainWindow):
 
         _draw_grid()
 
-        self.saturation = 0.5
-        color = QColor(255, 0, 0)  # Создаем объект QColor с RGB-значениями (синий цвет)
-        saturation = int(self.saturation * 255)  # Преобразуем насыщенность в диапазон от 0 до 255
-        color.setHsv(color.hue(), saturation, color.value())  # Устанавливаем насыщенность цвета
-        
-        painter.setBrush(color)
-
+        color = QColor(255, 0, 0)  # Создаем объект QColor с RGB-значениями
         if self.draw_line_switcher:
             paint_template = self.grid.PAINT_TEMPLATES[self.ui.LineManagerComboBox.currentText()]
             self.paint_model = paint_template(coords=self.points)
@@ -67,13 +62,25 @@ class MainView(QMainWindow):
             # pen.setWidth(2)
             # painter.setPen(pen)
 
-            for i in range(len(draw_points) - 1):
+            for i in range(len(draw_points)):
                 point1 = self._calc_point(draw_points[i])
                 # point2 = self._calc_point(draw_points[i + 1])
                 self.cache_points.append((point1[0], point1[1]))
+                if s := self.paint_model._c:
+                    saturation = int(s[i] * 255)  # Преобразуем насыщенность в диапазон от 0 до 255
+                    self.cache_saturation.append(saturation)
+                    color.setHsv(color.hue(), saturation, color.value())  # Устанавливаем насыщенность цвета
+
+                painter.setBrush(color)                        
                 painter.drawRect(point1[0], point1[1], self.grid.spacing, self.grid.spacing)
         else:
+            si = 0
             for x, y in self.cache_points:
+                if self.cache_saturation:
+                    saturation = self.cache_saturation[si]  # Преобразуем насыщенность в диапазон от 0 до 255
+                    color.setHsv(color.hue(), saturation, color.value())  # Устанавливаем насыщенность цвета 
+                    si += 1
+                painter.setBrush(color)
                 painter.drawRect(x, y, self.grid.spacing, self.grid.spacing)
         self.draw_line_switcher = False
         
@@ -81,6 +88,7 @@ class MainView(QMainWindow):
     def draw_line(self):
         self.draw_line_switcher = True
         self.cache_points = []
+        self.cache_saturation = []
         self.update()
         print("Line drawed!")
 

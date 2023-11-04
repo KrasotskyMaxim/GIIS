@@ -6,10 +6,10 @@ logs/
 
 
 # files
-*.ui
 *.log
 *.env
 
 # my file
 result.json
 testqt.py
+testmodel.py
