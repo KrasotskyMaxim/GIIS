@@ -32,7 +32,7 @@ class LineDrawer(QMainWindow):
 
         self.setMenuBar(self.menu_bar())
 
-        self._switch_view(self.main_view)
+        self._goto_slines()
         self.setCentralWidget(self.widgets)
     
     def menu_bar(self):
@@ -50,13 +50,12 @@ class LineDrawer(QMainWindow):
         return menu_bar
     
     def _init_view(self):
-        self.main_view.ui.ExplainPushButton.clicked.connect(lambda: self._goto_circles(draw=True))
         self.explain_view.ui.BackPushButton.clicked.connect(lambda: self._goto_slines(draw=True))
         
     def _switch_view(self, view):
         self.current_view = view
         self.widgets.setCurrentWidget(self.current_view)
-
+    
     def _goto_explain(self):
         table_data, model_name = self.main_view.get_explain_data()
         if table_data:

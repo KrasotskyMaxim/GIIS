@@ -21,7 +21,7 @@ class GraphicManager:
     
     @property
     def _c(self):
-        return False
+        return []
     
 
 class CDAManager(GraphicManager):
@@ -191,7 +191,7 @@ class ByManager(GraphicManager):
         
     @property
     def _c(self):
-        return [coords['c'] for coords in self.res_table.values()]
+        return [coords.get('c') for coords in self.res_table.values()]
     
     def __str__(self):
         return 'By'

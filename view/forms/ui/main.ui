@@ -143,12 +143,12 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Y2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="ExplainPushButton">
+  <widget class="QPushButton" name="DebugPushButton">
    <property name="geometry">
     <rect>
-     <x>600</x>
+     <x>580</x>
      <y>660</y>
-     <width>89</width>
+     <width>95</width>
      <height>25</height>
     </rect>
    </property>

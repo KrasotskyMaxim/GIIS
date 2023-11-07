@@ -57,10 +57,19 @@ class MainForm(object):
         self.y2Label = QtWidgets.QLabel(LineForm)
         self.y2Label.setGeometry(QtCore.QRect(610, 220, 31, 31))
         self.y2Label.setObjectName("y2Label")
-        self.ExplainPushButton = QtWidgets.QPushButton(LineForm)
-        self.ExplainPushButton.setGeometry(QtCore.QRect(600, 660, 89, 25))
-        self.ExplainPushButton.setObjectName("ExplainPushButton")
-
+        self.DebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.DebugPushButton.setGeometry(QtCore.QRect(580, 660, 95, 25))
+        self.DebugPushButton.setObjectName("DebugPushButton")
+        
+        self.ForwardDebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.ForwardDebugPushButton.setGeometry(QtCore.QRect(351, 660, 25, 25))
+        self.ForwardDebugPushButton.setObjectName("ForwardDebugPushButton")
+        
+        self.BackDebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.BackDebugPushButton.setGeometry(QtCore.QRect(323, 660, 25, 25))
+        self.BackDebugPushButton.setObjectName("BackDebugPushButton")
+        
+        
         self.retranslateUi(LineForm)
         QtCore.QMetaObject.connectSlotsByName(LineForm)
 
@@ -75,13 +84,15 @@ class MainForm(object):
         self.y1Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y1</span></p></body></html>"))
         self.x2Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X2</span></p></body></html>"))
         self.y2Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y2</span></p></body></html>"))
-        self.ExplainPushButton.setText(_translate("LineForm", "explain..."))
-
+        self.DebugPushButton.setText(_translate("LineForm", "DEBUG: OFF"))
+        
+        self.ForwardDebugPushButton.setText(_translate("LineForm", ">"))
+        self.BackDebugPushButton.setText(_translate("LineForm", "<"))
+        
 
 class GridDataForm:
     MARGIN = 100
     COORD_LEN = 50
-    POINT_MULT = 10
     PAINT_TEMPLATES = {
         'CDA': CDAManager,
         'Brazenhem': BrazenhemManager,
@@ -91,8 +102,12 @@ class GridDataForm:
     def __init__(self, view):
         self.size = min(view.width(), view.height()) - 2 * self.MARGIN # 500
         self.spacing = self.size // self.COORD_LEN # 10
+        
         self.start_x = (view.width() - self.size) // 2 # 100
         self.start_y = (view.height() - self.size) // 2 # 100
+        
+        self.end_x = (view.width() - self.MARGIN - self.spacing) # 600
+        self.end_y = (view.height() - self.MARGIN) # 600
 
 
 
