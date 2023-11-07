@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QTableWidgetItem
 from PyQt5.QtGui import QPainter, QPen, QFont, QColor
 from PyQt5.QtCore import Qt, QPoint
 
 from view.forms import ExplainForm
 
 
-class ExplainView(QMainWindow):    
+class ExplainView(QWidget):    
     TABLE_LABLE_TEMPLATE = "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">{model_name}</span></p></body></html>" 
     COLUMN_STEP_NAME = "i, step"
     

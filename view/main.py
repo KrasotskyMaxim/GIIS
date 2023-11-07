@@ -1,12 +1,14 @@
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QPen, QFont, QColor
 from PyQt5.QtCore import Qt
 
 from view.forms import MainForm, GridDataForm
 
 
-class MainView(QMainWindow):    
+class MainView(QWidget):
+    LABLE_FONT = "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">{name}</span></p></body></html>"
     draw_line_switcher = False
+    draw_circles_switcher = False
 
     def __init__(self):
         super(MainView, self).__init__()
@@ -20,12 +22,112 @@ class MainView(QMainWindow):
         
     def init_UI(self):
         self.ui.DrawPushButton.clicked.connect(self.draw_line)
+        self.ui.LineManagerComboBox.currentIndexChanged.connect(self.prepare_circles_mode)
         
         self._hide_interface()
     
     def _hide_interface(self):
         pass
+    
+    def prepare_slines(self):
+        draw_line_switcher = True
+        draw_circles_switcher = False
 
+        self.ui.LineManagerComboBox.setItemText(0, "CDA")
+        self.ui.LineManagerComboBox.setItemText(1, "Brazenhem")
+        self.ui.LineManagerComboBox.setItemText(2, "By")
+        
+        self.ui.x1Label.setText(self.LABLE_FONT.format(name="X1"))
+        self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y1"))
+        self.ui.x2Label.setText(self.LABLE_FONT.format(name="X2"))
+        self.ui.y2Label.setText(self.LABLE_FONT.format(name="Y2"))
+
+        self.ui.x1Label.show()
+        self.ui.y1Label.show()
+        self.ui.x2Label.show()
+        self.ui.y2Label.show()
+        
+        self.ui.x1SpinBox.show()
+        self.ui.y1SpinBox.show()
+        self.ui.x2SpinBox.show()
+        self.ui.y2SpinBox.show()
+        
+    def prepare_circles(self):
+        self.draw_line_switcher = False
+        self.draw_circles_switcher = True
+
+        self.ui.LineManagerComboBox.setItemText(0, "Circle")
+        self.ui.LineManagerComboBox.setItemText(1, "Ellipse")
+        self.ui.LineManagerComboBox.setItemText(2, "Hyperball")
+        self.ui.LineManagerComboBox.setItemText(2, "Paraball")
+        
+        # circle by default
+        self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
+        self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y"))
+        self.ui.x2Label.setText(self.LABLE_FONT.format(name="R"))
+        
+        self.ui.y2Label.hide()
+        self.ui.y2SpinBox.hide()
+    
+        self.ui.x1Label.show()
+        self.ui.y1Label.show()
+        self.ui.x2Label.show()
+        
+        self.ui.x1SpinBox.show()
+        self.ui.y1SpinBox.show()
+        self.ui.x2SpinBox.show()
+    
+    def prepare_circles_mode(self):
+        selected_mode = self.ui.LineManagerComboBox.currentText()
+        
+        if selected_mode == "Circle":
+            self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
+            self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y"))
+            self.ui.x2Label.setText(self.LABLE_FONT.format(name="R"))
+            
+            self.ui.y2Label.hide()
+            self.ui.y2SpinBox.hide()
+        
+            self.ui.x1Label.show()
+            self.ui.y1Label.show()
+            self.ui.x2Label.show()
+            
+            self.ui.x1SpinBox.show()
+            self.ui.y1SpinBox.show()
+            self.ui.x2SpinBox.show()
+        elif selected_mode in ("Ellipse", "Hyperball"):
+            self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
+            self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y"))
+            self.ui.x2Label.setText(self.LABLE_FONT.format(name="A"))
+            self.ui.y2Label.setText(self.LABLE_FONT.format(name="B"))
+        
+            self.ui.x1Label.show()
+            self.ui.y1Label.show()
+            self.ui.x2Label.show()
+            self.ui.y2Label.show()
+            
+            self.ui.x1SpinBox.show()
+            self.ui.y1SpinBox.show()
+            self.ui.x2SpinBox.show()
+            self.ui.y2SpinBox.show()
+        elif selected_mode == "Paraball":
+            self.ui.x1Label.setText(self.LABLE_FONT.format(name="A"))
+            self.ui.y1Label.setText(self.LABLE_FONT.format(name="H"))
+            self.ui.x2Label.setText(self.LABLE_FONT.format(name="K"))
+            
+            self.ui.y2Label.hide()
+            self.ui.y2SpinBox.hide()
+        
+            self.ui.x1Label.show()
+            self.ui.y1Label.show()
+            self.ui.x2Label.show()
+            
+            self.ui.x1SpinBox.show()
+            self.ui.y1SpinBox.show()
+            self.ui.x2SpinBox.show()
+        else:
+            print("Line mode selected!")
+    
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
