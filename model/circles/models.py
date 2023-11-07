@@ -1,31 +1,38 @@
-import matplotlib.pyplot as plt
+class GraphicManager:
+    @property
+    def _c(self):
+        return []
 
-class Circle:
-    def draw_circle(xc, yc, r):
-        x = 0
-        y = r
-        d = 3 - 2 * r
 
-        points = []
+class CircleManager(GraphicManager):
+    def __init__(self, coords: tuple):
+        self.raw_vals = coords[:3]
+        self._calc_points()
+        self.points = []
+        
+    def _calc_coords(self):
+        x, y, r = self.raw_coords
+        dx = 0
+        dy = self.r
+        D = 3 - 2 * self.r
 
-        while x <= y:
-            points.append((xc + x, yc + y))
-            points.append((xc - x, yc + y))
-            points.append((xc + x, yc - y))
-            points.append((xc - x, yc - y))
-            points.append((xc + y, yc + x))
-            points.append((xc - y, yc + x))
-            points.append((xc + y, yc - x))
-            points.append((xc - y, yc - x))
+        while dx <= dy:
+            self.points.append((self.x + dx, self.y + dy))
+            self.points.append((self.x - dx, self.y + dy))
+            self.points.append((self.x + dx, self.y - dy))
+            self.points.append((self.x - dx, self.y - dy))
+            self.points.append((self.x + dy, self.y + dx))
+            self.points.append((self.x - dy, self.y + dx))
+            self.points.append((self.x + dy, self.y - dx))
+            self.points.append((self.x - dy, self.y - dx))
 
-            if d < 0:
-                d += 4 * x + 6
+            if D < 0:
+                D += 4 * dx + 6
             else:
-                d += 4 * (x - y) + 10
-                y -= 1
-            x += 1
+                D += 4 * (dx - dy) + 10
+                dy -= 1
+            dx += 1
 
-        return points
 
     # Пример использования:
     # xc, yc, r = 0, 0, 50
@@ -37,8 +44,7 @@ class Circle:
     # plt.gca().set_aspect('equal', adjustable='box')
     # plt.show()
 
-class Ellipse:
-
+class EllipseManager(GraphicManager):
     def draw_ellipse(xc, yc, a, b):
         x = 0
         y = b
@@ -88,7 +94,7 @@ class Ellipse:
     # plt.gca().set_aspect('equal', adjustable='box')
     # plt.show()
 
-class Hyperball:
+class HyperballManager(GraphicManager):
 
     def draw_hyperbola(xc, yc, a, b):
         x = 0
@@ -128,8 +134,7 @@ class Hyperball:
     # plt.gca().set_aspect('equal', adjustable='box')
     # plt.show()
 
-class Paraball:
-    
+class ParaballManager(GraphicManager):
     def draw_parabola(a, h, k):
         points = []
         for x in range(-100, 101):

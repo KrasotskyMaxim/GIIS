@@ -10,84 +10,79 @@
 
 from PyQt5 import QtCore, QtWidgets
 
-from model import (
-    CDAManager,
-    BrazenhemManager,
-    ByManager,
-)
+from model import *
 
 
 class MainForm(object):
     def __init__(self, form) -> None:
         self.setupUi(form)
 
-    def setupUi(self, LineForm):
-        LineForm.setObjectName("LineForm")
-        LineForm.resize(700, 700)
-        self.DrawPushButton = QtWidgets.QPushButton(LineForm)
+    def setupUi(self, DrawForm):
+        DrawForm.setObjectName("DrawForm")
+        DrawForm.resize(700, 700)
+        self.DrawPushButton = QtWidgets.QPushButton(DrawForm)
         self.DrawPushButton.setGeometry(QtCore.QRect(310, 660, 89, 25))
         self.DrawPushButton.setObjectName("DrawPushButton")
-        self.LineManagerComboBox = QtWidgets.QComboBox(LineForm)
-        self.LineManagerComboBox.setGeometry(QtCore.QRect(575, 20, 111, 25))
-        self.LineManagerComboBox.setObjectName("LineManagerComboBox")
-        self.LineManagerComboBox.addItem("")
-        self.LineManagerComboBox.addItem("")
-        self.LineManagerComboBox.addItem("")
-        self.x1SpinBox = QtWidgets.QSpinBox(LineForm)
+        self.DrawManagerComboBox = QtWidgets.QComboBox(DrawForm)
+        self.DrawManagerComboBox.setGeometry(QtCore.QRect(575, 20, 111, 25))
+        self.DrawManagerComboBox.setObjectName("DrawManagerComboBox")
+        self.DrawManagerComboBox.addItem("")
+        self.DrawManagerComboBox.addItem("")
+        self.DrawManagerComboBox.addItem("")
+        self.x1SpinBox = QtWidgets.QSpinBox(DrawForm)
         self.x1SpinBox.setGeometry(QtCore.QRect(640, 100, 48, 26))
         self.x1SpinBox.setObjectName("x1SpinBox")
-        self.y1SpinBox = QtWidgets.QSpinBox(LineForm)
+        self.y1SpinBox = QtWidgets.QSpinBox(DrawForm)
         self.y1SpinBox.setGeometry(QtCore.QRect(640, 140, 48, 26))
         self.y1SpinBox.setObjectName("y1SpinBox")
-        self.x2SpinBox = QtWidgets.QSpinBox(LineForm)
+        self.x2SpinBox = QtWidgets.QSpinBox(DrawForm)
         self.x2SpinBox.setGeometry(QtCore.QRect(640, 180, 48, 26))
         self.x2SpinBox.setObjectName("x2SpinBox")
-        self.y2SpinBox = QtWidgets.QSpinBox(LineForm)
+        self.y2SpinBox = QtWidgets.QSpinBox(DrawForm)
         self.y2SpinBox.setGeometry(QtCore.QRect(640, 220, 48, 26))
         self.y2SpinBox.setObjectName("y2SpinBox")
-        self.x1Label = QtWidgets.QLabel(LineForm)
+        self.x1Label = QtWidgets.QLabel(DrawForm)
         self.x1Label.setGeometry(QtCore.QRect(610, 100, 31, 31))
         self.x1Label.setObjectName("x1Label")
-        self.y1Label = QtWidgets.QLabel(LineForm)
+        self.y1Label = QtWidgets.QLabel(DrawForm)
         self.y1Label.setGeometry(QtCore.QRect(610, 140, 31, 31))
         self.y1Label.setObjectName("y1Label")
-        self.x2Label = QtWidgets.QLabel(LineForm)
+        self.x2Label = QtWidgets.QLabel(DrawForm)
         self.x2Label.setGeometry(QtCore.QRect(610, 180, 31, 31))
         self.x2Label.setObjectName("x2Label")
-        self.y2Label = QtWidgets.QLabel(LineForm)
+        self.y2Label = QtWidgets.QLabel(DrawForm)
         self.y2Label.setGeometry(QtCore.QRect(610, 220, 31, 31))
         self.y2Label.setObjectName("y2Label")
-        self.DebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.DebugPushButton = QtWidgets.QPushButton(DrawForm)
         self.DebugPushButton.setGeometry(QtCore.QRect(580, 660, 95, 25))
         self.DebugPushButton.setObjectName("DebugPushButton")
         
-        self.ForwardDebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.ForwardDebugPushButton = QtWidgets.QPushButton(DrawForm)
         self.ForwardDebugPushButton.setGeometry(QtCore.QRect(351, 660, 25, 25))
         self.ForwardDebugPushButton.setObjectName("ForwardDebugPushButton")
         
-        self.BackDebugPushButton = QtWidgets.QPushButton(LineForm)
+        self.BackDebugPushButton = QtWidgets.QPushButton(DrawForm)
         self.BackDebugPushButton.setGeometry(QtCore.QRect(323, 660, 25, 25))
         self.BackDebugPushButton.setObjectName("BackDebugPushButton")
         
-        
-        self.retranslateUi(LineForm)
-        QtCore.QMetaObject.connectSlotsByName(LineForm)
+        self.retranslateUi(DrawForm)
+        QtCore.QMetaObject.connectSlotsByName(DrawForm)
 
-    def retranslateUi(self, LineForm):
+    def retranslateUi(self, DrawForm):
         _translate = QtCore.QCoreApplication.translate
-        LineForm.setWindowTitle(_translate("LineForm", "Form"))
-        self.DrawPushButton.setText(_translate("LineForm", "DRAW"))
-        self.LineManagerComboBox.setItemText(0, _translate("LineForm", "CDA"))
-        self.LineManagerComboBox.setItemText(1, _translate("LineForm", "Brazenhem"))
-        self.LineManagerComboBox.setItemText(2, _translate("LineForm", "By"))
-        self.x1Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X1</span></p></body></html>"))
-        self.y1Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y1</span></p></body></html>"))
-        self.x2Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X2</span></p></body></html>"))
-        self.y2Label.setText(_translate("LineForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y2</span></p></body></html>"))
-        self.DebugPushButton.setText(_translate("LineForm", "DEBUG: OFF"))
+        DrawForm.setWindowTitle(_translate("DrawForm", "Form"))
+        self.DrawPushButton.setText(_translate("DrawForm", "DRAW"))
+        self.DrawManagerComboBox.setItemText(0, _translate("DrawForm", "CDA"))
+        self.DrawManagerComboBox.setItemText(1, _translate("DrawForm", "Brazenhem"))
+        self.DrawManagerComboBox.setItemText(2, _translate("DrawForm", "By"))
+        self.x1Label.setText(_translate("DrawForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X1</span></p></body></html>"))
+        self.y1Label.setText(_translate("DrawForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y1</span></p></body></html>"))
+        self.x2Label.setText(_translate("DrawForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">X2</span></p></body></html>"))
+        self.y2Label.setText(_translate("DrawForm", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Y2</span></p></body></html>"))
+        self.DebugPushButton.setText(_translate("DrawForm", "DEBUG: OFF"))
         
-        self.ForwardDebugPushButton.setText(_translate("LineForm", ">"))
-        self.BackDebugPushButton.setText(_translate("LineForm", "<"))
+        self.ForwardDebugPushButton.setText(_translate("DrawForm", ">"))
+        self.BackDebugPushButton.setText(_translate("DrawForm", "<"))
         
 
 class GridDataForm:
@@ -97,6 +92,11 @@ class GridDataForm:
         'CDA': CDAManager,
         'Brazenhem': BrazenhemManager,
         'By': ByManager,
+        
+        'Circle': CircleManager,
+        'Ellipse': EllipseManager,
+        'Hyperball': HyperballManager,
+        'Paraball': ParaballManager,
     }
 
     def __init__(self, view):
@@ -110,12 +110,16 @@ class GridDataForm:
         self.end_y = (view.height() - self.MARGIN) # 600
 
 
+class DrawTypes:
+    SLINE = 'Sline'
+    RING = 'Ring'
+
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    LineForm = QtWidgets.QWidget()
+    DrawForm = QtWidgets.QWidget()
     ui = MainForm()
-    ui.setupUi(LineForm)
-    LineForm.show()
+    ui.setupUi(DrawForm)
+    DrawForm.show()
     sys.exit(app.exec_())

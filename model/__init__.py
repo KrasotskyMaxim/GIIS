@@ -1,5 +1,9 @@
-from model.straight_line.models import (
+from model.models import (
     CDAManager,
     BrazenhemManager,
     ByManager,
+    CircleManager,
+    EllipseManager,
+    ParaballManager,
+    HyperballManager,
 )

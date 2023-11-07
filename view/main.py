@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QPen, QFont, QColor
 from PyQt5.QtCore import Qt
 
-from view.forms import MainForm, GridDataForm
+from view.forms import MainForm, GridDataForm, DrawTypes
 
 
 class MainView(QWidget):
@@ -12,23 +12,22 @@ class MainView(QWidget):
         "started": False,
         "step": 0,
     }
-    
-    draw_line_switcher = False
-    draw_circles_switcher = False
-    
+    draw = False
+
     def __init__(self):
         super(MainView, self).__init__()
         self.ui = MainForm(self)
         self.grid = GridDataForm(self)
-        
+    
         self.paint_model = None
         self.debug_points = []
+        self.debug_saturation = []
         
         self.init_UI()
         
     def init_UI(self):
-        self.ui.DrawPushButton.clicked.connect(self.draw_line)
-        self.ui.LineManagerComboBox.currentIndexChanged.connect(self.prepare_circles_mode)
+        self.ui.DrawPushButton.clicked.connect(self.draw_figure)
+        self.ui.DrawManagerComboBox.currentIndexChanged.connect(self.change_ring_mode)
         
         self.ui.DebugPushButton.clicked.connect(self._switch_debug)
         self.ui.ForwardDebugPushButton.clicked.connect(self._forward_debug)
@@ -38,7 +37,7 @@ class MainView(QWidget):
         self.ui.x2SpinBox.valueChanged.connect(self._changed_box)
         self.ui.y1SpinBox.valueChanged.connect(self._changed_box)
         self.ui.y2SpinBox.valueChanged.connect(self._changed_box)
-        self.ui.LineManagerComboBox.currentIndexChanged.connect(self._changed_box)
+        self.ui.DrawManagerComboBox.currentIndexChanged.connect(self._changed_box)
         
         self._hide_interface()
                 
@@ -57,7 +56,8 @@ class MainView(QWidget):
         
         if self.DEBUG_MODE["step"] < len(self.debug_points):
             self.DEBUG_MODE["step"] += 1
-        self.draw_line_switcher = True
+        
+        self.draw = True
         self.update()
             
     def _back_debug(self):
@@ -71,26 +71,25 @@ class MainView(QWidget):
         if self.DEBUG_MODE["step"] > 0:
             self.DEBUG_MODE["step"] -= 1
             
-        self.draw_line_switcher = True
+        self.draw = True
         self.update()
         
     def _calc_debug_points(self):
         saturation = 255
-        paint_template = self.grid.PAINT_TEMPLATES[self.ui.LineManagerComboBox.currentText()]
-        self.paint_model = paint_template(coords=self.points)
-        draw_points = self.paint_model.coords
+        paint_template = self.grid.PAINT_TEMPLATES[self.ui.DrawManagerComboBox.currentText()]
+        self.paint_model = paint_template(values=self.points)
+        draw_points = self.paint_model.points
         
         for i in range(len(draw_points)):
-            point1 = self._calc_point(draw_points[i])
+            point = self._calc_point(draw_points[i])
             
-            if self._is_out_point(point1[0], point1[1]):
+            if self._is_out_point(point[0], point[1]):
                 continue
             
-            s = self.paint_model._c
-            if s and all(s):
+            if s := self.paint_model.saturation:
                 saturation = int(s[i] * 255)
 
-            self.debug_points.append((point1[0], point1[1]))
+            self.debug_points.append((point[0], point[1]))
             self.debug_saturation.append(saturation)
 
     def _hide_interface(self):
@@ -99,16 +98,16 @@ class MainView(QWidget):
     
     def _switch_debug(self):
         if not self.DEBUG_MODE["enable"]:
+            self.clear_grid()
             self.DEBUG_MODE["enable"] = True
-            self.clear_line()
-
+            
             self.ui.DebugPushButton.setText("DEBUG: ON")
             self.ui.DrawPushButton.hide()
             self.ui.ForwardDebugPushButton.show()
             self.ui.BackDebugPushButton.show()
         else:
             self._reset_debug_mode()
-            self.clear_line()
+            self.clear_grid()
             
             self.ui.DebugPushButton.setText("DEBUG: OFF")
             self.ui.DrawPushButton.show()
@@ -122,14 +121,18 @@ class MainView(QWidget):
             "step": 0,
         }
     
-    def prepare_slines(self):
-        draw_line_switcher = True
-        draw_circles_switcher = False
+    def prepare_sline(self):
+        while (c := self.ui.DrawManagerComboBox.count()) != 3:
+            if c < 3:
+                self.ui.DrawManagerComboBox.addItem("")
+            elif c > 3:    
+                self.ui.DrawManagerComboBox.removeItem(0)
 
-        self.ui.LineManagerComboBox.setItemText(0, "CDA")
-        self.ui.LineManagerComboBox.setItemText(1, "Brazenhem")
-        self.ui.LineManagerComboBox.setItemText(2, "By")
+        self.ui.DrawManagerComboBox.setItemText(0, "CDA")
+        self.ui.DrawManagerComboBox.setItemText(1, "Brazenhem")
+        self.ui.DrawManagerComboBox.setItemText(2, "By")
         
+        self.ui.DrawManagerComboBox.setCurrentIndex(0)
         self.ui.x1Label.setText(self.LABLE_FONT.format(name="X1"))
         self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y1"))
         self.ui.x2Label.setText(self.LABLE_FONT.format(name="X2"))
@@ -154,16 +157,20 @@ class MainView(QWidget):
         self.ui.y2SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
         self.ui.y2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
         
-    def prepare_circles(self):
-        self.draw_line_switcher = False
-        self.draw_circles_switcher = True
+    def prepare_ring(self):
+        while (c := self.ui.DrawManagerComboBox.count()) != 4:
+            if c < 4:
+                self.ui.DrawManagerComboBox.addItem("")
+            elif c > 4:    
+                self.ui.DrawManagerComboBox.removeItem(0)
 
-        self.ui.LineManagerComboBox.setItemText(0, "Circle")
-        self.ui.LineManagerComboBox.setItemText(1, "Ellipse")
-        self.ui.LineManagerComboBox.setItemText(2, "Hyperball")
-        self.ui.LineManagerComboBox.setItemText(2, "Paraball")
+        self.ui.DrawManagerComboBox.setItemText(0, "Circle")
+        self.ui.DrawManagerComboBox.setItemText(1, "Ellipse")
+        self.ui.DrawManagerComboBox.setItemText(2, "Hyperball")
+        self.ui.DrawManagerComboBox.setItemText(3, "Paraball")
         
         # circle by default
+        self.ui.DrawManagerComboBox.setCurrentIndex(0)
         self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
         self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y"))
         self.ui.x2Label.setText(self.LABLE_FONT.format(name="R"))
@@ -178,9 +185,18 @@ class MainView(QWidget):
         self.ui.x1SpinBox.show()
         self.ui.y1SpinBox.show()
         self.ui.x2SpinBox.show()
+        
+        self.ui.x1SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
+        self.ui.x1SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+        self.ui.y1SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
+        self.ui.y1SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+        self.ui.x2SpinBox.setMinimum(0)
+        self.ui.x2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+        self.ui.y2SpinBox.setMinimum(0)
+        self.ui.y2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
     
-    def prepare_circles_mode(self):
-        selected_mode = self.ui.LineManagerComboBox.currentText()
+    def change_ring_mode(self):
+        selected_mode = self.ui.DrawManagerComboBox.currentText()
         
         if selected_mode == "Circle":
             self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
@@ -197,6 +213,9 @@ class MainView(QWidget):
             self.ui.x1SpinBox.show()
             self.ui.y1SpinBox.show()
             self.ui.x2SpinBox.show()
+            
+            self.ui.x2SpinBox.setMinimum(0)
+            self.ui.x2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
         elif selected_mode in ("Ellipse", "Hyperball"):
             self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
             self.ui.y1Label.setText(self.LABLE_FONT.format(name="Y"))
@@ -212,28 +231,40 @@ class MainView(QWidget):
             self.ui.y1SpinBox.show()
             self.ui.x2SpinBox.show()
             self.ui.y2SpinBox.show()
-        elif selected_mode == "Paraball":
-            self.ui.x1Label.setText(self.LABLE_FONT.format(name="A"))
-            self.ui.y1Label.setText(self.LABLE_FONT.format(name="H"))
-            self.ui.x2Label.setText(self.LABLE_FONT.format(name="K"))
             
-            self.ui.y2Label.hide()
-            self.ui.y2SpinBox.hide()
-        
+            self.ui.x2SpinBox.setMinimum(0)
+            self.ui.x2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+            self.ui.y2SpinBox.setMinimum(0)
+            self.ui.y2SpinBox.setMaximum(self.grid.COORD_LEN // 2)    
+        elif selected_mode == "Paraball":
+            self.ui.x1Label.setText(self.LABLE_FONT.format(name="X"))
+            self.ui.y1Label.setText(self.LABLE_FONT.format(name="A"))
+            self.ui.x2Label.setText(self.LABLE_FONT.format(name="B"))
+            self.ui.y2Label.setText(self.LABLE_FONT.format(name="C"))
+            
             self.ui.x1Label.show()
             self.ui.y1Label.show()
             self.ui.x2Label.show()
+            self.ui.y2Label.show()
             
             self.ui.x1SpinBox.show()
             self.ui.y1SpinBox.show()
             self.ui.x2SpinBox.show()
-        else:
-            print("Line mode selected!")
-    
+            self.ui.y2SpinBox.show()
+            
+            self.ui.x1SpinBox.setMinimum(0)
+            self.ui.x1SpinBox.setMaximum(self.grid.COORD_LEN // 2)  
+            self.ui.x2SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
+            self.ui.x2SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+            self.ui.y1SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
+            self.ui.y1SpinBox.setMaximum(self.grid.COORD_LEN // 2)
+            self.ui.y2SpinBox.setMinimum(-self.grid.COORD_LEN // 2)
+            self.ui.y2SpinBox.setMaximum(self.grid.COORD_LEN // 2)    
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        color = QColor(255, 0, 0)  # Создаем объект QColor с RGB-значениями
+        color = QColor(255, 0, 0)
         saturation = 255
 
         def _draw_grid():
@@ -268,7 +299,7 @@ class MainView(QWidget):
 
         _draw_grid()
         
-        if self.draw_line_switcher:            
+        if self.draw:            
             if self.DEBUG_MODE["enable"]:
                 if self.DEBUG_MODE["started"]:
                     si = 0
@@ -280,36 +311,33 @@ class MainView(QWidget):
                         painter.setBrush(color)
                         painter.drawRect(x, y, self.grid.spacing, self.grid.spacing)        
             else:
-                paint_template = self.grid.PAINT_TEMPLATES[self.ui.LineManagerComboBox.currentText()]
-                self.paint_model = paint_template(coords=self.points)
-                draw_points = self.paint_model.coords
+                paint_template = self.grid.PAINT_TEMPLATES[self.ui.DrawManagerComboBox.currentText()]
+                self.paint_model = paint_template(values=self.points)
+                draw_points = self.paint_model.points
                 
                 for i in range(len(draw_points)):
-                    point1 = self._calc_point(draw_points[i])
+                    point = self._calc_point(draw_points[i])
                     
-                    if self._is_out_point(point1[0], point1[1]):
+                    if self._is_out_point(point[0], point[1]):
                         continue
                     
-                    s = self.paint_model._c
-                    if s and all(s):
+                    if s := self.paint_model.saturation:
                         saturation = int(s[i] * 255)
 
                     color.setHsv(color.hue(), saturation, color.value())
                     painter.setBrush(color)               
-                    painter.drawRect(point1[0], point1[1], self.grid.spacing, self.grid.spacing)
-        self.draw_line_switcher = False
+                    painter.drawRect(point[0], point[1], self.grid.spacing, self.grid.spacing)
+        self.draw = False
         
     def _is_out_point(self, x , y):
-        return x not in range(self.grid.start_x - 1, self.grid.end_x + 1) and y not in range(self.grid.start_y - 1, self.grid.end_y + 1) 
+        return x not in range(self.grid.start_x - 1, self.grid.end_x + 1) or y not in range(self.grid.start_y - 1, self.grid.end_y - 1) 
 
-    def draw_line(self):
-        self.draw_line_switcher = True
-        self.debug_points = []
-        self.debug_saturation = []
+    def draw_figure(self):
+        self.draw = True
         self.update()
     
-    def clear_line(self):
-        self.draw_line_switcher = False
+    def clear_grid(self):
+        self.draw = False
         self.debug_points = []
         self.debug_saturation = []
         self.update()
@@ -318,13 +346,7 @@ class MainView(QWidget):
         self.DEBUG_MODE["step"] = 0
         self.debug_points = []
         self.debug_saturation = []
-    
-    def get_explain_data(self):
-        if self.paint_model:
-            return self.paint_model.res_table, str(self.paint_model)
-        
-        return {}, ''
-    
+
     @property
     def points(self):
         return (

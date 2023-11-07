@@ -3,81 +3,50 @@ import sys
 from PyQt5.QtWidgets import (
     QMainWindow,
     QApplication, 
-    QStackedWidget,
     QAction, 
     QMenuBar,
 )
 
-from view import MainView, ExplainView
+from view import MainView
+from view.forms import DrawTypes
 
 
 class LineDrawer(QMainWindow):
-    current_view = None
-    
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
         self.setFixedSize(700, 730)
+        self.view = MainView()
         
-        self.widgets = QStackedWidget()
-        self.main_view = MainView()
-        self.explain_view = ExplainView()
-        
-        self.widgets.addWidget(self.main_view)
-        self.widgets.addWidget(self.explain_view)
-        
-        self._init_view()
+        self.setMenuBar(self._menu_bar())
 
-        self.setMenuBar(self.menu_bar())
-
-        self._goto_slines()
-        self.setCentralWidget(self.widgets)
+        self._goto_sline()
+        self.setCentralWidget(self.view)
     
-    def menu_bar(self):
+    def _menu_bar(self):
         menu_bar = QMenuBar(self)
         options_menu = menu_bar.addMenu("Options")
 
-        slines = QAction("SLines", self)
-        slines.triggered.connect(self._goto_slines)
-        options_menu.addAction(slines)
+        sline = QAction(DrawTypes.SLINE, self)
+        sline.triggered.connect(self._goto_sline)
+        options_menu.addAction(sline)
 
-        circles = QAction("Circles", self)
-        circles.triggered.connect(self._goto_circles)
-        options_menu.addAction(circles)
+        ring = QAction(DrawTypes.RING, self)
+        ring.triggered.connect(self._goto_ring)
+        options_menu.addAction(ring)
 
         return menu_bar
-    
-    def _init_view(self):
-        self.explain_view.ui.BackPushButton.clicked.connect(lambda: self._goto_slines(draw=True))
-        
-    def _switch_view(self, view):
-        self.current_view = view
-        self.widgets.setCurrentWidget(self.current_view)
-    
-    def _goto_explain(self):
-        table_data, model_name = self.main_view.get_explain_data()
-        if table_data:
-            self.explain_view.set_table_data(
-                data=table_data,
-                model_name=model_name
-            )
-            self._switch_view(self.explain_view)
-        else:
-            print("line not drawed!")
 
-    def _goto_slines(self, draw=False):
-        if draw:
-            self.main_view.draw_line()
-        self.main_view.prepare_slines()
-        self._switch_view(self.main_view)
-        
-    def _goto_circles(self, draw=False):
-        if draw:
-            ...
-        self.main_view.prepare_circles()
-        self._switch_view(self.main_view)
+    def _goto_sline(self):
+        self.view.clear_grid()
+        self.view.prepare_sline()
+
+    def _goto_ring(self, draw=False):
+        self.view.clear_grid()
+        self.view.prepare_ring()
+
 
 def application():
     app = QApplication(sys.argv)
