@@ -199,24 +199,37 @@ class CircleManager(GraphicManager):
 
         dx = 0
         dy = r
-        D = 3 - 2 * r
-
-        while dx <= dy:
+        inf = 0
+        D = 2 - 2 * r
+        
+        while dy >= inf:
             self.points.append((x + dx, y + dy))
             self.points.append((x - dx, y + dy))
             self.points.append((x + dx, y - dy))
             self.points.append((x - dx, y - dy))
-            self.points.append((x + dy, y + dx))
-            self.points.append((x - dy, y + dx))
-            self.points.append((x + dy, y - dx))
-            self.points.append((x - dy, y - dx))
 
-            if D < 0:
-                D += 4 * dx + 6
-            else:
-                D += 4 * (dx - dy) + 10
-                dy -= 1
-            dx += 1
+            if D > 0:
+                DD = 2*D - 2*dx - 1
+                if DD <= 0:
+                    dx += 1
+                    dy -= 1
+                    D = D + 2*dx - 2*dy + 2
+                elif DD > 0:
+                    dy -= 1
+                    D = D - 2*dy + 1
+            elif D == 0:
+                dx += 1
+                dy =- 1
+                D = D + 2*dx - 2*dy + 2
+            elif D < 0:
+                DD = 2*D + 2*dy - 1
+                if DD > 0:
+                    dx += 1
+                    dy -= 1
+                    D = D + 2*dx - 2*dy + 2
+                elif DD <= 0:
+                    dx += 1
+                    D = D + 2*dx + 1
 
 
 class EllipseManager(GraphicManager):
@@ -264,29 +277,35 @@ class EllipseManager(GraphicManager):
 class HyperballManager(GraphicManager):
     def _calc_points(self):
         x, y, a, b = self.raw_values
-        
-        if not a or not b:
-            return
-        
-        dx = 0
-        dy = b
-        a_sqr = a * a
-        b_sqr = b * b
-        while dx * b_sqr <= dy * a_sqr:
-            self.points.append((x + dx, y + dy))
-            self.points.append((x - dx, y + dy))
+        ppoints = []
+        mpoints = []
+        for i in range(-x, x + 1):
+            j = y + int(b * math.sqrt(1 + (i/a)**2))
+            tj = j
+            ppoints.append((i, j))
+            mpoints.append((i, -j))
+        ppoints = self.calc_skipped_points(ppoints)
+        mpoints = self.calc_skipped_points(mpoints)
+        self.points = ppoints + mpoints
+            
+    def calc_skipped_points(self, points):
+        plen = len(points)
+        i = 0
+        for _ in range(plen):
+            if i >= len(points) - 1:
+                continue
 
-            dx += 1
-            dy = int((b_sqr - b_sqr * dx * dx / a_sqr) ** 0.5)
-
-        dx = 0
-        dy = b
-        while dy > 0:
-            self.points.append((x + dx, y - dy))
-            self.points.append((x - dx, y - dy))
-
-            dx += 1
-            dy = int((b_sqr - b_sqr * dx * dx / a_sqr) ** 0.5)
+            maxy = max([points[i][1], points[i+1][1]])
+            miny = min([points[i][1], points[i+1][1]])
+            
+            ni = i + 1
+            while miny < maxy - 1:
+                miny += 1
+                points.insert(ni, (points[i][0]+1, miny))
+                ni += 1
+                 
+            i = ni
+        return points
 
 
 class ParaballManager(GraphicManager):
